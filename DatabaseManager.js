@@ -1,5 +1,6 @@
 const fs = require("fs");
 const crypto = require("crypto");
+const util = require('util');
 
 
 var databases = [];
@@ -96,7 +97,7 @@ class Database
 		if (trueTypeOf(structure) !== "object") throw new Error(`Table structure has to be an object.`);
 		if (trueTypeOf(config) !== "object") throw new Error(`Table config has to be an object.`);
 
-		if (this.getTable(tableName)) throw new Error(`Table already exists.`);
+		if (this.GET_TABLE(tableName)) throw new Error(`Table already exists.`);
 
 		var finalStructure = {};
 
@@ -273,9 +274,9 @@ class Table
 		});
 
 		return {
-			get RESULT() { 
+  			[util.inspect.custom]: () =>
+			{ 
 				if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
-				
 				return matchingIndexes.map(index => index = this.#data[index] ); 
 			},
 
