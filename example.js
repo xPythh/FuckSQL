@@ -1,9 +1,35 @@
 const DatabaseManager = require("./DatabaseManager");
 
-const myDatabase = DatabaseManager.load("coolDatabase");
+const DB = DatabaseManager.LOAD("DB");
 
-var users = Database.getTable("users"); // Assuming its already created
+// Create a new Table if not exists
+if (!DB.GET_TABLE("users"))
+  DB.CREATE_TABLE("users", {
+    "id": [0, "AUTOINCR"]
+    "username": [""],
+    "password": [""],
+    "email": ["", null]
+  });
 
-users.SELECT({ id: 1 }).UPDATE_TO({ id: 5 }); 
+// Get the new table
+var usersTable = Database.getTable("users");
+users.INSERT({
+  id: null,
+  username: "MyUsername",
+  password: "MyPassword",
+  email: null
+});
 
-console.log( users.SELECT({ id: 5 }).RESULT() ); // Returns 1 entry 
+var query = usersTable.SELECT({ username: "MyUsername" }); 
+if (!query) 
+  return console.log(`User not found`); // <- This line will NOT execute because the user is in the database
+
+query.UPDATE_TO({ email: "MyEmail@gmail.com" });
+  
+query = usersTable.SELECT({ email: "MyEmail@gmail.com" });
+
+query.DELETE();
+
+usersTable.CLEAR();
+
+usersTable.DROP();
