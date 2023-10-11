@@ -33,7 +33,7 @@ class Database
 		this.#folder = `./${dbFolder}/`;
 
 		if (!fs.existsSync(this.#folder))
-    		this.#buildDatabase(this.#folder, options)
+    		this.#buildDatabase(this.#folder, options = {})
 
     	var tableFiles = fs.readdirSync(this.#folder);
     	for (var tableFile of tableFiles)
