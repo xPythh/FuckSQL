@@ -33,7 +33,7 @@ class Database
 		this.#folder = `./${dbFolder}/`;
 
 		if (!fs.existsSync(this.#folder))
-    		this.#buildDatabase(this.#folder, options = {})
+    		this.#buildDatabase(this.#folder)
 
     	var tableFiles = fs.readdirSync(this.#folder);
     	for (var tableFile of tableFiles)
@@ -131,7 +131,7 @@ class Database
 
 	GET_TABLE(tableName) { return this.#tables.find(table => table.name === `${tableName}.json`); }
 
-	#buildDatabase(dbFolder, options)
+	#buildDatabase(dbFolder, options = {})
 	{
     	fs.mkdirSync(this.#folder);
     	if (options.createExampleTable); // TODO
