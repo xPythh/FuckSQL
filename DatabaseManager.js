@@ -257,6 +257,8 @@ class Table
 		this.#data.push(finalEntry);
 	}
 
+	GET_ALL() { return JSON.parse(JSON.stringify( this.#data )); };
+	
 	SELECT(values)
 	{
 		if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
@@ -273,32 +275,68 @@ class Table
 		        matchingIndexes.push(index);   
 		});
 
-		return {
-  			[util.inspect.custom]: () =>
-			{ 
-				if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
-				return matchingIndexes.map(index => index = this.#data[index] ); 
-			},
+		var finalRows = matchingIndexes.map(index => {
+			var finalRow = this.#putMethods(this.#data[index], index);
+			return finalRow;
+		});
 
-			DELETE: () => 
-			{
-				if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
+		finalRows.DELETE = () =>
+		{
+			if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
 				
 				for (var matchingIndex of matchingIndexes)
 					this.#data.splice(matchingIndex, 1);
-			},
-			UPDATE_TO: (values) =>
-			{
-				if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
+		};
+
+		finalRows.UPDATE_TO = (values) =>
+		{
+			if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
 				
-				for (var matchingIndex of matchingIndexes)
-					for (var keyName of Object.keys(values))
+			for (var matchingIndex of matchingIndexes)
+				for (var keyName of Object.keys(values))
+				{
+					if (!this.#structure[keyName]) throw new Error(`Key ${keyName} not present in structure`);
+					if (trueTypeOf(values[keyName]) !== this.#structure[keyName].type) throw new Error(`${keyName} is not of type ${trueTypeOf(value)}.`);
+
+					this.#data[matchingIndex][keyName] = values[keyName];
+				}
+		}
+		return finalRows;
+	}
+
+	#putMethods(obj, matchingIndex)
+	{
+		var finalObj = JSON.parse(JSON.stringify(obj));
+		finalObj.DELETE = () =>
+		{
+			if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);		
+			this.#data.splice(matchingIndex, 1);
+		}
+
+		finalObj.UPDATE_TO = (values) =>
+		{
+			values = JSON.parse(JSON.stringify(values)); // Removes functions etc
+
+			if (this.#endThread) throw new Error(`Cannot communicate with closed table.`);
+				
+			for (var keyName of Object.keys(values))
+			{
+				if (!this.#structure[keyName]) throw new Error(`Key ${keyName} not present in structure`);
+				if (trueTypeOf(values[keyName]) !== this.#structure[keyName].type) 
+				{
+					if (values[keyName] === null && this.#structure[keyName].nullable)
 					{
-						if (!this.#structure[keyName]) throw new Error(`Key ${keyName} not present in structure`);
 						this.#data[matchingIndex][keyName] = values[keyName];
+						continue;
 					}
+
+					throw new Error(`${keyName} is not of type ${trueTypeOf(values[keyName])}.`);
+				}
+				this.#data[matchingIndex][keyName] = values[keyName];
 			}
 		}
+
+		return finalObj;
 	}
 
 	CLEAR()
