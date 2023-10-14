@@ -61,7 +61,7 @@ usersTable.INSERT({
 var query = usersTable.SELECT({ username: "MyUsername" });
 
 // Accessing the variable query directly will give you the array of matching values
-console.log(query); // [/* user inserted before */]
+console.log(query); // [  /*user inserted before*/  ]
 
 // Updating the queries
 query.UPDATE_TO({ email: "MyEmail@gmail.com" });
