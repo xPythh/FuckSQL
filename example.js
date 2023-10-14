@@ -20,7 +20,7 @@ users.INSERT({
   email: null
 });
 
-var query = usersTable.SELECT({ username: "MyUsername" }); 
+var query = usersTable.SELECT({ username: "MyUsername" })[0]; // First result of the SELECT 
 if (!query) 
   return console.log(`User not found`); // <- This line will NOT execute because the user is in the database
 
